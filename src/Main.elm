@@ -2,13 +2,11 @@ port module Main exposing (main)
 
 import Browser
 import Browser.Dom as Dom
+import Browser.Events exposing (onResize)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Task as Task
-
-
-port windowResize : (Bool -> msg) -> Sub msg
 
 
 
@@ -38,7 +36,7 @@ init _ =
 type Msg
     = Increment
     | Decrement
-    | NoticeWindowResize Bool
+    | NoticeWindowResize Int Int
     | GotViewport Dom.Viewport
 
 
@@ -55,8 +53,8 @@ update msg model =
         Decrement ->
             ( { model | logoSize = logoSize - 0.2 }, Cmd.none )
 
-        NoticeWindowResize _ ->
-            ( { model | isResized = True }, Task.perform GotViewport Dom.getViewport )
+        NoticeWindowResize w _ ->
+            ( { model | viewportWidth = toFloat w }, Cmd.none )
 
         GotViewport { viewport } ->
             ( { model | viewportWidth = viewport.width }, Cmd.none )
@@ -89,7 +87,7 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ windowResize NoticeWindowResize
+        [ onResize NoticeWindowResize
         ]
 
 
